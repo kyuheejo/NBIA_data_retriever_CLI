@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 )
 
@@ -30,7 +31,7 @@ func UnTar(dst string, r io.Reader) error {
 
 		// return any other error
 		case err != nil:
-			return err
+			return errors.Wrap(err, "unknown error while untar")
 
 		// if the header is nil, just skip it (not sure how this happens)
 		case header == nil:
@@ -51,7 +52,7 @@ func UnTar(dst string, r io.Reader) error {
 		case tar.TypeDir:
 			if _, err := os.Stat(target); err != nil {
 				if err := os.MkdirAll(target, 0755); err != nil {
-					return err
+					return errors.Wrap(err, "failed to create dir while untar")
 				}
 			}
 
@@ -59,12 +60,12 @@ func UnTar(dst string, r io.Reader) error {
 		case tar.TypeReg:
 			f, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
 			if err != nil {
-				return err
+				return errors.Wrap(err, "failed to create file while untar")
 			}
 
 			// copy over contents
 			if _, err := io.Copy(f, tr); err != nil {
-				return err
+				return errors.Wrap(err, "failed to copy data while untar")
 			}
 
 			// manually close here after each file operation; defering would cause each file close

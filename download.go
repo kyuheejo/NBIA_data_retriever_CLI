@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 
 	"fmt"
@@ -41,18 +42,19 @@ func (info *FileInfo) Get() {
 	resp, err := http.Post(info.URL, "application/x-www-form-urlencoded; charset=ISO-8859-1", bytes.NewReader([]byte("")))
 
 	if err != nil {
-		log.Error().Msgf("%v", err)
+		log.Error().Msgf("%v, failed to post", err)
 	}
 
 	content, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Error().Msgf("%v", err)
+		log.Error().Msgf("%v, failed to load response body", err)
 	}
 
 	data := strings.Split(string(content), "|")
 	info.Total = data
 
 	if len(data) < 11 {
+		log.Warn().Msgf("%v", data)
 		log.Error().Msgf("%v less than 11 elements", data)
 	}
 
@@ -62,7 +64,7 @@ func (info *FileInfo) Get() {
 	info.SeriesUID = data[3]
 
 	if size, err := strconv.ParseInt(data[6], 10, 64); err != nil {
-		log.Error().Msgf("%v", err)
+		log.Error().Msgf("%v, failed to convert size to int64", err)
 	} else {
 		info.Size = int64(size)
 	}
@@ -78,7 +80,7 @@ func (info *FileInfo) GetOutput(output string) string {
 
 	if _, err := os.Stat(outputDir); os.IsNotExist(err) {
 		if err = os.MkdirAll(outputDir, 0755); err != nil {
-			log.Error().Msgf("%v", err)
+			log.Error().Msgf("%v, failed to create output dir", err)
 		}
 	}
 
@@ -126,7 +128,7 @@ func (info *FileInfo) Download(output, username, password string) error {
 
 	req, err := http.NewRequest("POST", baseURL, strings.NewReader(form.Encode()))
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "failed to download while POST")
 	}
 	// custom the request header
 	req.Header.Add("password", "")

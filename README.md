@@ -1,6 +1,6 @@
 # NBIA data retriever CLI
 
-> A simple replacement of NBIA data retriever.
+> Guide to downloading and cleaning CBIS-DDSM dataaset through NBIA data retriever CLI.
 
 ---
 

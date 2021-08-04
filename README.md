@@ -19,7 +19,28 @@ docker run -v ${PWD}/output:/output nbia -i cbis-ddsm.tcia -o /output -p 8 -t 12
 ```
 
 ### Step 2. Cleaning and building dataset 
-1. Run 
+Once the dataset is downloaded, you'll notice that the downloaded raw file paths are different from those specified in description csv in two ways. 
+1) Paths to files are different. It contains one extra intermediate folder (date).
+2) File names are different. File names should be of the form "000000.dcm," not arbitrarily long numbers as it is. 
+Furthermore, we ought to convert DICOM files to PNG files for the purpose of training. 
+
+In order to clean the dataset to match description csv files, follow these steps:
+1. Download all description csv files from [this link](https://wiki.cancerimagingarchive.net/display/Public/CBIS-DDSM) and save all of them to a separate folder (caution: that specific folder should contain all FOUR description csv files, and description csv file ONLY)
+2. Run build_ddsm.py with --resume flag set to false (default). This should remove intermediate directories. 
+```bash
+python build_ddsm.py --csv_path <path to csv files> --rootdir <path to dataset> --resume false
+```
+<path to dataset> should be like: <path to dataset>/Mass-Training_P_01981_RIGHT_MLO_1/1.3.6.../000000.png. If you followed the instructions above, it should be somthing like: NBIA_data_retriever_CLI/output/CBIS-DDSM
+3. Convert DICOM files to PNG files by running the following commands 
+```bash
+find $DATASET_DCIM_DIR -name '*.dcm' | \
+xargs -n1 -P8 -I{} bash -c 'f={}; dcmj2pnm $f | convert - ${f/.dcm/.png}'
+```
+4. Now run build_ddsm.py once again with --resume flag set to true. This should (1) rename files and (2) build tfds dataset. For more information about the resulting tfds dataset, refer to [this link](https://www.tensorflow.org/datasets/catalog/curated_breast_imaging_ddsm)
+```bash
+python build_ddsm.py --csv_path <path to csv files> --rootdir <path to dataset> --resume true
+```
+
 
 ---
 

@@ -48,18 +48,20 @@ python build_ddsm.py --csv_path <path to csv files> --rootdir <path to dataset> 
   
   For example, he following code snippet creates a pytorch dataset from tfds dataset. 
   ```bash
-  tfds.download.DownloadManager.manual_dir = rootdir
+    # load tfds dataset 
     ds, ds_info = tfds.load('curated_breast_imaging_ddsm',
-                    data_dir = rootdir,
+                    data_dir = <path to dataset>,
                     with_info = True,
                     as_dataset_kwargs={'shuffle_files':False, 'batch_size':-1})
     ds_test    = ds['train'] # either train, test, or validation
-  
+    # load data as numpy 
     my_x = tfds.as_numpy(ds_test)['image']
     my_y = tfds.as_numpy(ds_test)['label']
-    tensor_x = torch.Tensor(my_x) # transform to torch tensor
+    # transform to torch tensor
+    tensor_x = torch.Tensor(my_x) 
     tensor_y = torch.Tensor(my_y)
-    dataset = TensorDataset(tensor_x,tensor_y)
+    # create a pytorch dataset
+    dataset = TensorDataset(tensor_x, tensor_y)
   ```
   To learn more about using a tfds dataset please refer to [this link](https://www.tensorflow.org/datasets)
   

@@ -4,7 +4,7 @@ Guide to downloading and cleaning CBIS-DDSM dataaset through NBIA data retriever
 
 ---
 
-## Command line usage
+## Instruction 
 
 ### Step 1. Downloading data 
 
@@ -30,55 +30,36 @@ In order to clean the dataset to match description csv files, follow these steps
 ```bash
 python build_ddsm.py --csv_path <path to csv files> --rootdir <path to dataset> --resume false
 ```
-<path to dataset> should be like: <path to dataset>/Mass-Training_P_01981_RIGHT_MLO_1/1.3.6.../000000.png. If you followed the instructions above, it should be somthing like: NBIA_data_retriever_CLI/output/CBIS-DDSM
+<path to dataset> should be like: <path to dataset>/Mass-Training_P_01981_RIGHT_MLO_1/1.3.6.../000000.png. If you followed the instructions above, it should be somthing like: output/CBIS-DDSM
 3. Convert DICOM files to PNG files by running the following commands 
 ```bash
 find $DATASET_DCIM_DIR -name '*.dcm' | \
 xargs -n1 -P8 -I{} bash -c 'f={}; dcmj2pnm $f | convert - ${f/.dcm/.png}'
 ```
-4. Now run build_ddsm.py once again with --resume flag set to true. This should (1) rename files and (2) build tfds dataset. For more information about the resulting tfds dataset, refer to [this link](https://www.tensorflow.org/datasets/catalog/curated_breast_imaging_ddsm)
+4. Now run build_ddsm.py once again with --resume flag set to true. This should (1) rename files and (2) build tfds dataset. 
 ```bash
 python build_ddsm.py --csv_path <path to csv files> --rootdir <path to dataset> --resume true
 ```
 
 
----
-
-### [Update 2020.12.24]
-
-Add `--username` and `--passwd`, maybe this is usedful retrive the restriced data.
-
->> I do not have an account for  NBIA, therefore, this is no tested yet.
-
----
-
-### [Update 2019.09.17]
-
-Just noticed original NBIA add tar wrapper of real dcm files
-
-Now I add a tar wrapper to decompress the dcm files.
-At the same time, I cannot check the download progress of single file anymore.
-Therefore, I use a json file to record information of single seriesUID, and mark the relevant file of the seriesUID has been downloaded.
-
----
-
-Issues with NBIA data retriever:
-
-- Cannot resume download, if there is any error occurs, have to download all files from the beginning
-- Swing is kind of heavy, and cannot run it in server
-
----
-Advantages:
-
-- Proxy like `socks5://127.0.0.1:1080` or `http://127.0.0.1:1080`
-- Resume download
-- Command line
-
----
-
-Known issues:
-
-- The `public.cancerimagingarchive.net/nbia-download/servlet` use `POST` to transfer data from server to local
-, the connection may be terminated even before the download is complete. Therefore, **PLEASE** set timeout as huge as possible
-- progress bar is a mess when using multiple process
-- I do not have a account of NBIA, therefore this program could not handle the restricted data for now.
+### Step 3. Using the built dataset 
+ 
+  Now you can use the final tfds dataset to train and test your model. The dataset contains 224x224 patches extracted from CBIS-DDSM dataset divided into five classes: normal(0), benign_calcification (1), benign_mass (2), malignant_calcification (3), and malignant_mass (4). For more information about the dataset, refer to [this link](https://www.tensorflow.org/datasets/catalog/curated_breast_imaging_ddsm)
+  
+  For example, he following code snippet creates a pytorch dataset from tfds dataset. 
+  ```bash
+  tfds.download.DownloadManager.manual_dir = rootdir
+    ds, ds_info = tfds.load('curated_breast_imaging_ddsm',
+                    data_dir = rootdir,
+                    with_info = True,
+                    as_dataset_kwargs={'shuffle_files':False, 'batch_size':-1})
+    ds_test    = ds['train'] # either train, test, or validation
+  
+    my_x = tfds.as_numpy(ds_test)['image']
+    my_y = tfds.as_numpy(ds_test)['label']
+    tensor_x = torch.Tensor(my_x) # transform to torch tensor
+    tensor_y = torch.Tensor(my_y)
+    dataset = TensorDataset(tensor_x,tensor_y)
+  ```
+  To learn more about using a tfds dataset please refer to [this link](https://www.tensorflow.org/datasets)
+  

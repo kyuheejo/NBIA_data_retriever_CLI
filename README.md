@@ -1,26 +1,21 @@
 # NBIA data retriever CLI
 
-> Guide to downloading and cleaning CBIS-DDSM dataaset through NBIA data retriever CLI.
+Guide to downloading and cleaning CBIS-DDSM dataaset through NBIA data retriever CLI.
 
 ---
 
 ## Command line usage
 
+### Step 1. Downloading data 
+
+1. git clone 
+2. Download ".tcia" manifest file from [this link](https://wiki.cancerimagingarchive.net/display/Public/CBIS-DDSM) and save it in this directory 
+3. Use the following commands to download CBIS-DDSM under output/ folder
+
 ```bash
-Usage: nbia_cli_darwin [global options]                                       
-                                                                              
-Global options:                                                               
-        -i, --input   Path to tcia file
-        -o, --output  Output directory, or output file when --meta enabled (default: downloads)            
-        -x, --proxy   Proxy
-        -t, --timeout Due to limitation of target server, please set this time out value as big as possible (default: 1200000)
-        -p, --process Start how many download at same time (default: 1)
-        -m, --meta    Get Meta info of all files
-        -u, --username Username for control data
-        -w, --passwd   Password for control data
-        -v, --version Show version
-            --debug   Show debug info
-            --help    Show this help
+mkdir output
+docker build --tag nbia . 
+docker run -v ${PWD}/output:/output nbia -i cbis-ddsm.tcia -o /output -p 8 -t 1200000 
 ```
 
 ---

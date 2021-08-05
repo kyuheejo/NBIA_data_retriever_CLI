@@ -9,7 +9,7 @@ Guide to downloading and cleaning CBIS-DDSM dataaset through NBIA data retriever
 ### Step 1. Downloading data 
 
 1. git clone 
-2. Download ".tcia" manifest file from [this link](https://wiki.cancerimagingarchive.net/display/Public/CBIS-DDSM) and save it in this directory 
+2. Download ".tcia" manifest file from [this link](https://wiki.cancerimagingarchive.net/display/Public/CBIS-DDSM) and save it in this git repository 
 3. Use following commands to download CBIS-DDSM under output/ folder
 
 ```bash

@@ -89,6 +89,9 @@ def build_ddsm(args):
 
 def remove_intermediate(path, rootdir):
     path_list = path.split("/")
+    if not isdir(join(rootdir, "/".join(path_list[:-2]))):
+        print(f'file path {path} does not exist')
+        return
     date = listdir(join(rootdir, "/".join(path_list[:-2])))
     if len(date) == 1 and date[0] != path_list[-2]:
         for file in listdir(join(rootdir, "/".join(path_list[:-2]), *date)):

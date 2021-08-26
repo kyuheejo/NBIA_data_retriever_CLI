@@ -1,4 +1,4 @@
-# Complete guide to using NBIA data retriever CLI for CBIS-DDSM dataset
+# Using NBIA data retriever CLI for CBIS-DDSM dataset
 
 Guide to downloading and cleaning CBIS-DDSM dataaset through NBIA data retriever CLI.
 
